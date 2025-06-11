@@ -32,7 +32,7 @@ public class GameService {
     public Game createGame() {
         Game game = Game.builder()
                 .id(UUID.randomUUID())
-                .board(new char[9])
+                .board(new Character[9])
                 .nextTurn(Player.X)
                 .status(Status.IN_PROGRESS)
                 .createdAt(Instant.now())
@@ -57,7 +57,7 @@ public class GameService {
         if (game.getNextTurn() != move.player()) {
             throw new ResponseStatusException(BAD_REQUEST, "Not player turn");
         }
-        if (game.getBoard()[move.index()] != '\0') {
+        if (game.getBoard()[move.index()] != null) {
             throw new ResponseStatusException(BAD_REQUEST, "Cell occupied");
         }
         game.getBoard()[move.index()] = move.player().name().charAt(0);
@@ -67,15 +67,15 @@ public class GameService {
     }
 
     private void updateStatus(Game game) {
-        char[] b = game.getBoard();
+        Character[] b = game.getBoard();
         for (int[] combo : WINNING_COMBINATIONS) {
-            char c1 = b[combo[0]];
-            if (c1 != '\0' && c1 == b[combo[1]] && c1 == b[combo[2]]) {
+            Character c1 = b[combo[0]];
+            if (c1 != null && c1.equals(b[combo[1]]) && c1.equals(b[combo[2]])) {
                 game.setStatus(c1 == 'X' ? Status.X_WON : Status.O_WON);
                 return;
             }
         }
-        if (Arrays.stream(b).noneMatch(c -> c == '\0')) {
+        if (Arrays.stream(b).noneMatch(c -> c == null)) {
             game.setStatus(Status.DRAW);
         }
     }
