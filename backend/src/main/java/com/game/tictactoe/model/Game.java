@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class Game {
     private UUID id;
-    private char[] board;
+    private Character[] board;
     private Player nextTurn;
     private Status status;
     private Instant createdAt;
