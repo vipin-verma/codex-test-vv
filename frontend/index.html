@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; }
+        li { margin-bottom: .5em; }
+        input[type=text] { padding: .5em; margin-right: .5em; }
+    </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+function App() {
+    const [todos, setTodos] = React.useState([]);
+    const [title, setTitle] = React.useState("");
+    const [description, setDescription] = React.useState("");
+
+    const loadTodos = () => {
+        axios.get('/api/todos').then(r => setTodos(r.data));
+    };
+
+    React.useEffect(loadTodos, []);
+
+    const addTodo = () => {
+        axios.post('/api/todos', { title, description, completed: false })
+             .then(() => { setTitle(""); setDescription(""); loadTodos(); });
+    };
+
+    const deleteTodo = (id) => {
+        axios.delete(`/api/todos/${id}`).then(loadTodos);
+    };
+
+    const toggleTodo = (todo) => {
+        axios.put(`/api/todos/${todo.id}`, { ...todo, completed: !todo.completed })
+             .then(loadTodos);
+    };
+
+    return (
+        <div>
+            <h1>Todo List</h1>
+            <div>
+                <input value={title} placeholder="Title" onChange={e => setTitle(e.target.value)} />
+                <input value={description} placeholder="Description" onChange={e => setDescription(e.target.value)} />
+                <button onClick={addTodo}>Add</button>
+            </div>
+            <ul>
+                {todos.map(todo => (
+                    <li key={todo.id}>
+                        <span style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
+                            {todo.title} - {todo.description}
+                        </span>
+                        <button onClick={() => toggleTodo(todo)}>
+                            {todo.completed ? 'Undo' : 'Complete'}
+                        </button>
+                        <button onClick={() => deleteTodo(todo.id)}>Delete</button>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
